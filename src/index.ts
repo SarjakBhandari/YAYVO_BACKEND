@@ -10,6 +10,7 @@ app.use(express.json());
 
 // Mount routes
 app.use("/api/auth", authRoutes);
+
 app.use("/api/consumers", consumerRoutes);
 app.use("/api/retailers", retailerRoutes);
 
