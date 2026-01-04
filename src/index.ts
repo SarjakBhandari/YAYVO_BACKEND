@@ -1,30 +1,30 @@
-import express, {Application, Request, Response} from 'express';
-// import { connectDatabase } from './database/mongodb';
-// import  userrouter  from "./routes/user.routes"
-// import books from './routes/book.route';
-import bodyParser from 'body-parser';
-import { PORT } from './config';
-// import path from 'path';
-// import authUserRoutes from './routes/admin/user.route';
+import express from "express";
+import mongoose from "mongoose";
+import { PORT, MONGODB_URI } from "./config";
+import authRoutes from "./routes/auth.route";
+import consumerRoutes from "./routes/consumer.route";
+import retailerRoutes from "./routes/retailer.route";
 
-//definations
-const app: Application = express(); 
+const app = express();
+app.use(express.json());
 
-app.use(bodyParser.json());
+// Mount routes
+app.use("/api/auth", authRoutes);
+app.use("/api/consumers", consumerRoutes);
+app.use("/api/retailers", retailerRoutes);
 
-//routes
-app.get('/',(req: Request,res:Response)=>{
-    res.send('API IS RUNNING GOOD')
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const status = err.statusCode ?? 500;
+  res.status(status).json({ success: false, message: err.message || "Internal server error" });
 });
-// app.use("/api/auth",userrouter)
 
-// async function startServer() {
-//     await connectDatabase();
-    
-app.listen(PORT, () => {
-    console.log(`Server: http://localhost:${PORT}`)
-});
-// }
-// startServer();
-
-
+(async () => {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log("MongoDB connected");
+    app.listen(PORT, () => console.log(`API running on port ${PORT}`));
+  } catch (err) {
+    console.error("Failed to connect to MongoDB", err);
+    process.exit(1);
+  }
+})();
