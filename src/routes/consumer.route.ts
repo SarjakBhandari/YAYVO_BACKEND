@@ -5,17 +5,42 @@ import {
   getConsumerById,
   getConsumerByUsername,
   updateConsumer,
-  deleteConsumer
+  deleteConsumer,
 } from "../controller/consumer.controller";
-import { authorizedMiddleware } from "../middlewares/authorized.middleware";
+import {
+  authorizedMiddleware,
+  adminOnlyMiddleware,
+  consumerOnlyMiddleware,
+} from "../middlewares/authorized.middleware";
 
 const router = Router();
 
-router.post("/", authorizedMiddleware, createConsumer);
-router.get("/", authorizedMiddleware, getConsumers);
-router.get("/:id", authorizedMiddleware, getConsumerById);
-router.get("/username/:username", authorizedMiddleware, getConsumerByUsername);
-router.put("/:id", authorizedMiddleware, updateConsumer);
-router.delete("/:id", authorizedMiddleware, deleteConsumer);
+/**
+ * Routes for consumer management
+ * - Create consumer: only admin can create
+ * - Get all consumers: only admin
+ * - Get consumer by ID: consumer can view their own, admin can view any
+ * - Get consumer by username: consumer can view their own, admin can view any
+ * - Update consumer: consumer can update their own, admin can update any
+ * - Delete consumer: only admin
+ */
+
+// Admin creates a consumer
+router.post("/", authorizedMiddleware, adminOnlyMiddleware, createConsumer);
+
+// Admin gets all consumers
+router.get("/", authorizedMiddleware, adminOnlyMiddleware, getConsumers);
+
+// Consumer or admin gets consumer by ID
+router.get("/:id", authorizedMiddleware, consumerOnlyMiddleware, getConsumerById);
+
+// Consumer or admin gets consumer by username
+router.get("/username/:username", authorizedMiddleware, consumerOnlyMiddleware, getConsumerByUsername);
+
+// Consumer updates their own profile, admin can update any
+router.put("/:id", authorizedMiddleware, consumerOnlyMiddleware, updateConsumer);
+
+// Admin deletes a consumer
+router.delete("/:id", authorizedMiddleware, adminOnlyMiddleware, deleteConsumer);
 
 export default router;

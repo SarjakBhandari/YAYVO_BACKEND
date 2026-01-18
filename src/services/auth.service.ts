@@ -20,18 +20,24 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(input.password, BCRYPT_SALT_ROUNDS);
     const user = await users.createUser(input.email, passwordHash, "consumer");
 
-    await consumers.createConsumer({
-      authId: user._id.toString(),
-      fullName: input.fullName,
-      username: input.username,
-      phoneNumber: input.phoneNumber,
-      dob: input.dob,
-      gender: input.gender,
-      country: input.country,
-      profilePicture: input.profilePicture
-    });
+    try {
+      await consumers.createConsumer({
+        authId: user._id.toString(),
+        fullName: input.fullName,
+        username: input.username,
+        phoneNumber: input.phoneNumber,
+        dob: input.dob,
+        gender: input.gender,
+        country: input.country,
+        profilePicture: input.profilePicture
+      });
 
-    return this.issueToken(user);
+      return this.issueToken(user);
+    } catch (err) {
+      // rollback user if consumer creation fails
+      await users.deleteUserByID(user._id.toString());
+      throw err;
+    }
   }
 
   async registerRetailer(input: RegisterRetailerInput) {
@@ -41,18 +47,24 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(input.password, BCRYPT_SALT_ROUNDS);
     const user = await users.createUser(input.email, passwordHash, "retailer");
 
-    await retailers.createRetailer({
-      authId: user._id.toString(),
-      ownerName: input.ownerName,
-      organizationName: input.organizationName,
-      username: input.username,
-      phoneNumber: input.phoneNumber,
-      dateOfEstablishment: input.dateOfEstablishment,
-      country: input.country,
-      profilePicture: input.profilePicture
-    });
+    try {
+      await retailers.createRetailer({
+        authId: user._id.toString(),
+        ownerName: input.ownerName,
+        organizationName: input.organizationName,
+        username: input.username,
+        phoneNumber: input.phoneNumber,
+        dateOfEstablishment: input.dateOfEstablishment,
+        country: input.country,
+        profilePicture: input.profilePicture
+      });
 
-    return this.issueToken(user);
+      return this.issueToken(user);
+    } catch (err) {
+      // rollback user if retailer creation fails
+      await users.deleteUserByID(user._id.toString());
+      throw err;
+    }
   }
 
   async login(input: LoginInput) {
@@ -71,6 +83,10 @@ export class AuthService {
     const options: SignOptions = { expiresIn: "30d" };
 
     const token = jwt.sign(payload, secret, options);
-    return { token, user: { id: user._id, email: user.email, role: user.role } };
+    return {
+      success: true,
+      token,
+      user: { id: user._id, email: user.email, role: user.role }
+    };
   }
 }
