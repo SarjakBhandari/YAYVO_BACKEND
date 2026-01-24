@@ -59,3 +59,33 @@ export async function deleteConsumer(req: Request, res: Response, next: NextFunc
     next(err);
   }
 }
+export async function updateConsumerProfilePicture(req: Request, res: Response) {
+  try {
+    const authId = req.params.id; // consumer id or authId from route
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    // Multer gives us the filename, we build the relative path
+    const filePath = `/uploads/profilepicture/${req.file.filename}`;
+
+    // Update the consumer entity with the new profilePicture path
+    const updated = await service.updateProfilePicture(authId, filePath);
+
+    res.json({ success: true, data: updated });
+  } catch (err: any) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+}
+
+
+export async function getConsumerWithAuthIdController(req: Request, res: Response) {
+  try {
+    const authId = req.params.authId;
+    const consumer = await service.getByAuthId(authId);
+    res.json({ success: true, data: consumer });
+  } catch (err: any) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+}
+

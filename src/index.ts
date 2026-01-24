@@ -5,9 +5,13 @@ import consumerRoutes from "./routes/consumer.route";
 import retailerRoutes from "./routes/retailer.route";
 import { connectDatabase } from "./database/mongodb";
 import cors from 'cors';
+import path from "path";
 
 const app = express();
 app.use(express.json());
+// Serve static files from /uploads
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 let corsOptions={
     origin:[CORS_DOMAIN_FIRST,CORS_DOMAIN_SECOND],
     //which domain can access your server

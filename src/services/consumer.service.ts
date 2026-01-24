@@ -1,3 +1,4 @@
+// services/consumer.service.ts
 import { CreateConsumerInput, UpdateConsumerInput } from "../dtos/consumer.dtos";
 import { HttpError } from "../errors/http.error";
 import { ConsumerRepository } from "../repository/consumer.repository";
@@ -27,12 +28,23 @@ export class ConsumerService {
     return consumer;
   }
 
+  async getByAuthId(authId: string) {
+    const consumer = await repo.findByAuthId(authId);
+    if (!consumer) throw new HttpError(404, "Consumer not found");
+    return consumer;
+  }
+
   async update(id: string, input: UpdateConsumerInput) {
     const updated = await repo.updateConsumer(id, input as any);
     if (!updated) throw new HttpError(404, "Consumer not found");
     return updated;
   }
 
+async updateProfilePicture(authId: string, filePath: string) {
+  const updated = await repo.updateByAuthId(authId, { profilePicture: filePath } as any);
+  if (!updated) throw new HttpError(404, "Consumer not found");
+  return updated;
+}
   async delete(id: string) {
     const deleted = await repo.deleteConsumer(id);
     if (!deleted) throw new HttpError(404, "Consumer not found");
