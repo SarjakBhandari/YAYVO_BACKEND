@@ -3,8 +3,10 @@ import {
   createRetailer,
   getRetailers,
   getRetailerById,
+  getRetailerByAuthId,
   getRetailerByUsername,
   updateRetailer,
+  updateRetailerProfilePicture,
   deleteRetailer,
 } from "../controller/retailer.controller";
 import {
@@ -12,35 +14,33 @@ import {
   adminOnlyMiddleware,
   retailerOnlyMiddleware,
 } from "../middlewares/authorized.middleware";
+import { uploadProfilePicture } from "../middlewares/upload.middleware";
 
 const router = Router();
 
-/**
- * Routes for retailer management
- * - Create retailer: only admin can create
- * - Get all retailers: only admin
- * - Get retailer by ID: retailer can view their own, admin can view any
- * - Get retailer by username: retailer can view their own, admin can view any
- * - Update retailer: retailer can update their own, admin can update any
- * - Delete retailer: only admin
- */
-
-// Admin creates a retailer
-router.post("/", authorizedMiddleware, adminOnlyMiddleware, createRetailer);
-
-// Admin gets all retailers
-router.get("/", authorizedMiddleware, adminOnlyMiddleware, getRetailers);
-
-// Retailer or admin gets retailer by ID
+// Retailer or admin gets retailer by Mongo _id
 router.get("/:id", authorizedMiddleware, retailerOnlyMiddleware, getRetailerById);
+
+// Retailer or admin gets retailer by authId
+router.get("/auth/:authId", authorizedMiddleware, retailerOnlyMiddleware, getRetailerByAuthId);
 
 // Retailer or admin gets retailer by username
 router.get("/username/:username", authorizedMiddleware, retailerOnlyMiddleware, getRetailerByUsername);
 
-// Retailer updates their own profile, admin can update any
+// Retailer updates their own profile by Mongo _id
 router.put("/:id", authorizedMiddleware, retailerOnlyMiddleware, updateRetailer);
 
-// Admin deletes a retailer
+
+// Retailer updates their own profile picture by authId
+router.put(
+  "/auth/:authId/profile-picture",
+  authorizedMiddleware,
+  retailerOnlyMiddleware,
+  uploadProfilePicture.single("profilePicture"),
+  updateRetailerProfilePicture
+);
+
+// Admin deletes a retailer by Mongo _id
 router.delete("/:id", authorizedMiddleware, adminOnlyMiddleware, deleteRetailer);
 
 export default router;
