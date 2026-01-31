@@ -46,7 +46,7 @@ export class RetailerService {
   }
 
   async delete(id: string) {
-    const deleted = await repo.deleteRetailer(id);
+    const deleted = await repo.deleteByAuthId(id);
     if (!deleted) throw new HttpError(404, "Retailer not found");
     return { success: true };
   }

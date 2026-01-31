@@ -6,5 +6,5 @@ export interface IRetailerRepository {
   findById(id: string): Promise<IRetailer | null>;
   findByUsername(username: string): Promise<IRetailer | null>;
   updateRetailer(id: string, data: Partial<IRetailer>): Promise<IRetailer | null>;
-  deleteRetailer(id: string): Promise<IRetailer | null>;
+  deleteRetailer(authId: string): Promise<IRetailer | null>;
 }

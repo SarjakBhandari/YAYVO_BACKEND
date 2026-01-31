@@ -1,5 +1,6 @@
 // repository/consumer.repository.ts
 import { ConsumerModel, IConsumer } from "../models/consumer.model";
+import { UserModel } from "../models/user.model";
 import { IConsumerRepository } from "./interfaces/consumer.repository";
 
 export class ConsumerRepository implements IConsumerRepository {
@@ -31,7 +32,7 @@ export class ConsumerRepository implements IConsumerRepository {
  async updateByAuthId(authId: string, data: Partial<IConsumer>): Promise<IConsumer | null> {
   return ConsumerModel.findOneAndUpdate({ authId }, data, { new: true }).exec();
 }
-  async deleteConsumer(id: string): Promise<IConsumer | null> {
-    return ConsumerModel.findByIdAndDelete(id).exec();
+  async deleteConsumer(authId: string): Promise<IConsumer | null> {
+    return await ConsumerModel.findOneAndDelete({ authId }).exec() && UserModel.findByIdAndDelete(authId);
   }
 }

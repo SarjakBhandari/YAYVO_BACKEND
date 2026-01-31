@@ -6,5 +6,5 @@ export interface IConsumerRepository {
   findById(id: string): Promise<IConsumer | null>;
   findByUsername(username: string): Promise<IConsumer | null>;
   updateConsumer(id: string, data: Partial<IConsumer>): Promise<IConsumer | null>;
-  deleteConsumer(id: string): Promise<IConsumer | null>;
+  deleteConsumer(authId: string): Promise<IConsumer | null>;
 }
