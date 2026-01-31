@@ -21,6 +21,12 @@ export class RetailerService {
     return retailer;
   }
 
+  async getByAuthId(authId: string) {
+    const retailer = await repo.findByAuthId(authId);
+    if (!retailer) throw new HttpError(404, "Retailer not found");
+    return retailer;
+  }
+
   async getByUsername(username: string) {
     const retailer = await repo.findByUsername(username);
     if (!retailer) throw new HttpError(404, "Retailer not found");
@@ -29,6 +35,12 @@ export class RetailerService {
 
   async update(id: string, input: UpdateRetailerInput) {
     const updated = await repo.updateRetailer(id, input as any);
+    if (!updated) throw new HttpError(404, "Retailer not found");
+    return updated;
+  }
+
+  async updateProfilePicture(id: string, filePath: string) {
+    const updated = await repo.updateByAuthId(id, { profilePicture: filePath } as any);
     if (!updated) throw new HttpError(404, "Retailer not found");
     return updated;
   }

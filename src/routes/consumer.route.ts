@@ -29,18 +29,13 @@ const router = Router();
  * - Delete consumer: only admin
  */
 
-// Admin creates a consumer
-router.post("/", authorizedMiddleware, adminOnlyMiddleware, createConsumer);
-
-// Admin gets all consumers
-router.get("/", authorizedMiddleware, adminOnlyMiddleware, getConsumers);
 
 // Consumer or admin gets consumer by ID
-router.get("/:id", authorizedMiddleware, consumerOnlyMiddleware, getConsumerById);
+router.get("/:id", authorizedMiddleware,consumerOnlyMiddleware, getConsumerById);
 
-router.get("/username/:username", authorizedMiddleware, consumerOnlyMiddleware, getConsumerByUsername);
+router.get("/username/:username", authorizedMiddleware,consumerOnlyMiddleware, getConsumerByUsername);
 
-router.put("/:id", authorizedMiddleware, consumerOnlyMiddleware, updateConsumer);
+router.put("/:id", authorizedMiddleware,  consumerOnlyMiddleware, updateConsumer);
 
 router.put(
   "/:id/profile-picture",
@@ -49,10 +44,10 @@ router.put(
   uploadProfilePicture.single("profilePicture"),
   updateConsumerProfilePicture
 );
-router.get("/auth/:authId", authorizedMiddleware, getConsumerWithAuthIdController);
+router.get("/auth/:authId", authorizedMiddleware, consumerOnlyMiddleware, getConsumerWithAuthIdController);
 
 
 // Admin deletes a consumer
-router.delete("/:id", authorizedMiddleware, adminOnlyMiddleware, deleteConsumer);
+router.delete("/:id", authorizedMiddleware, consumerOnlyMiddleware, deleteConsumer);
 
 export default router;

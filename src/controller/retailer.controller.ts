@@ -32,6 +32,15 @@ export async function getRetailerById(req: Request, res: Response, next: NextFun
   }
 }
 
+export async function getRetailerByAuthId(req: Request, res: Response, next: NextFunction) {
+  try {
+    const retailer = await service.getByAuthId(req.params.authId);
+    res.json(retailer);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function getRetailerByUsername(req: Request, res: Response, next: NextFunction) {
   try {
     const retailer = await service.getByUsername(req.params.username);
@@ -51,6 +60,25 @@ export async function updateRetailer(req: Request, res: Response, next: NextFunc
   }
 }
 
+
+
+export async function updateRetailerProfilePicture(req: Request, res: Response, next: NextFunction) {
+  try {
+    console.log(req.params );
+    const authId = req.params.id;
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    const filePath = `/uploads/profilepicture/${req.file.filename}`;
+    const updated = await service.updateProfilePicture(authId, filePath);
+
+    res.json({ success: true, data: updated });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function deleteRetailer(req: Request, res: Response, next: NextFunction) {
   try {
     const result = await service.delete(req.params.id);
@@ -59,3 +87,4 @@ export async function deleteRetailer(req: Request, res: Response, next: NextFunc
     next(err);
   }
 }
+
