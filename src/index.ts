@@ -3,6 +3,7 @@ import { PORT, CORS_DOMAIN_FIRST, CORS_DOMAIN_SECOND } from "./config";
 import authRoutes from "./routes/auth.route";
 import consumerRoutes from "./routes/consumer.route";
 import retailerRoutes from "./routes/retailer.route";
+import adminRoutes from "./routes/admin.routes";
 import { connectDatabase } from "./database/mongodb";
 import cors from 'cors';
 import path from "path";
@@ -22,7 +23,7 @@ let corsOptions={
 app.use(cors(corsOptions));
 // Mount routes
 app.use("/api/auth", authRoutes);
-
+app.use("/api/admin",adminRoutes)
 app.use("/api/consumers", consumerRoutes);
 app.use("/api/retailers", retailerRoutes);
 
