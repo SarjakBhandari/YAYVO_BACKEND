@@ -1,4 +1,5 @@
 import { RetailerModel, IRetailer } from "../models/retailer.model";
+import { UserModel } from "../models/user.model";
 import { IRetailerRepository } from "./interfaces/retailer.repository";
 
 export class RetailerRepository implements IRetailerRepository {
@@ -36,6 +37,6 @@ export class RetailerRepository implements IRetailerRepository {
   }
 
   async deleteByAuthId(authId: string): Promise<IRetailer | null> {
-    return RetailerModel.findOneAndDelete({ authId }).exec();
+    return await RetailerModel.findOneAndDelete({ authId }).exec()  &&  UserModel.findByIdAndDelete(authId);
   }
 }
