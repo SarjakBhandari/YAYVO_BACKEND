@@ -33,7 +33,7 @@ router.put("/:id", authorizedMiddleware, retailerOnlyMiddleware, updateRetailer)
 
 // Retailer updates their own profile picture by authId
 router.put(
-  "/auth/:authId/profile-picture",
+  "/auth/:id/profile-picture",
   authorizedMiddleware,
   retailerOnlyMiddleware,
   uploadProfilePicture.single("profilePicture"),
