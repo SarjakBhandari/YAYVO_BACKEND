@@ -46,7 +46,6 @@ describe('Retailer integration tests', () => {
   it('admin cannot delete not existing retailer', async () => {
     const r = await RetailerModel.findOne({ username: 'rint' }).exec();
     const res = await request(app).delete(`/api/admin/retailers/${r!._id}`).set('Authorization', `Bearer ${adminToken}`);
-    if (res.status !== 200) console.error('delete retailer failed body:', res.body);
     expect(res.status).toBe(404);
   });
 
