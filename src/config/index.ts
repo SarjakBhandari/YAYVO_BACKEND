@@ -12,3 +12,8 @@ export const BCRYPT_SALT_ROUNDS: number =
 
 export const CORS_DOMAIN_FIRST: string= process.env.CORS_DOMAIN_FIRST || "http://localhost:3000";
 export const CORS_DOMAIN_SECOND: string= process.env.CORS_DOMAIN_SECOND || "http://localhost:3005";
+
+export const EMAIL_USER: string= process.env.EMAIL || "SAMPLE@RMAIL.COM";
+export const EMAIL_PASS: string= process.env.PASSWORD || "SAMPLE@RMAIL.COM";
+
+export const CLIENT_URL: string = process.env.CLIENT_URL || 'http://localhost:3000';

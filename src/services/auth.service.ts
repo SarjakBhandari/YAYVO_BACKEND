@@ -3,10 +3,11 @@ import jwt, { Secret, SignOptions } from "jsonwebtoken";
 import { UserRepository } from "../repository/user.repository";
 import { ConsumerRepository } from "../repository/consumer.repository";
 import { RetailerRepository } from "../repository/retailer.repository";
-import { JWT_SECRETS, JWT_EXPIRES_IN, BCRYPT_SALT_ROUNDS } from "../config";
+import { JWT_SECRETS, JWT_EXPIRES_IN, BCRYPT_SALT_ROUNDS, CLIENT_URL } from "../config";
 import { IUser } from "../models/user.model";
 import { LoginInput, RegisterConsumerInput, RegisterRetailerInput } from "../dtos/auth.dtos";
 import { HttpError } from "../errors/http.error";
+import { sendEmail } from "../config/email";
 
 const users = new UserRepository();
 const consumers = new ConsumerRepository();
@@ -89,4 +90,41 @@ export class AuthService {
       user: { id: user._id, email: user.email, role: user.role }
     };
   }
+
+
+async sendResetPasswordEmail(email?: string) {
+        if (!email) {
+            throw new HttpError(400, "Email is required");
+        }
+        const user = await users.getUserByEmail(email);
+        if (!user) {
+            throw new HttpError(404, "User not found");
+        }
+        const token = jwt.sign({ id: user._id }, JWT_SECRETS, { expiresIn: '1h' }); // 1 hour expiry
+        const resetLink = `${CLIENT_URL}/reset-password?token=${token}`;
+        const html = `<p>Click <a href="${resetLink}">here</a> to reset your password. This link will expire in 1 hour.</p>`;
+        await sendEmail(user.email, "Password Reset", html);
+        return user;
+
+    }
+
+    async resetPassword(token?: string, newPassword?: string) {
+        try {
+            if (!token || !newPassword) {
+                throw new HttpError(400, "Token and new password are required");
+            }
+            const decoded: any = jwt.verify(token, JWT_SECRETS);
+            const userId = decoded.id;
+            const user = await users.getUserByID(userId);
+            if (!user) {
+                throw new HttpError(404, "User not found");
+            }
+            const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
+            await users.updateUser(userId, { passwordHash: hashedPassword });
+            return user;
+        } catch (error) {
+            throw new HttpError(400, "Invalid or expired token");
+        }
+    }
+
 }
