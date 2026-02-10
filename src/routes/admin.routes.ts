@@ -7,7 +7,8 @@ import {
   updateConsumer,
   deleteConsumer,
   updateConsumerProfilePicture, 
-  getConsumerWithAuthIdController
+  getConsumerWithAuthIdController,
+  getAllConsumers
 } from "../controller/consumer.controller";
 import {
   createRetailer,
@@ -32,6 +33,7 @@ const router = Router();
 
 // Admin gets all consumers
 router.get("/consumers", authorizedMiddleware, adminOnlyMiddleware, getConsumers);
+router.get("/paginated_consumers", authorizedMiddleware, adminOnlyMiddleware, getAllConsumers);
 
 // Consumer or admin gets consumer by ID
 router.get("/consumers/:id", authorizedMiddleware, adminOnlyMiddleware, getConsumerById);
