@@ -50,4 +50,22 @@ async updateProfilePicture(authId: string, filePath: string) {
     if (!deleted) throw new HttpError(404, "Consumer not found");
     return { success: true };
   }
+
+      async getAllConsumers(
+        page?: string, size?: string, search?: string
+    ){
+        const pageNumber = page ? parseInt(page) : 1;
+        const pageSize = size ? parseInt(size) : 10;
+        const {users, total} = await repo.getAllUsers(
+            pageNumber, pageSize, search
+        );
+        const pagination = {
+            page: pageNumber,
+            size: pageSize,
+            totalItems: total,
+            totalPages: Math.ceil(total / pageSize)
+        }
+        return {users, pagination};
+    }
+
 }

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { ConsumerService } from "../services/consumer.service";
 import { CreateConsumerDto, UpdateConsumerDto } from "../dtos/consumer.dtos";
+import { QueryParams } from "../types/query.type";
 
 const service = new ConsumerService();
 
@@ -86,6 +87,22 @@ export async function getConsumerWithAuthIdController(req: Request, res: Respons
     res.json({ success: true, data: consumer });
   } catch (err: any) {
     res.status(400).json({ success: false, message: err.message });
-  }
-}
+  }}
+
+  export async function getAllConsumers(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { page, size, search }:QueryParams= req.query;
+            const { users, pagination } = await service.getAllConsumers(
+                page,size, search
+            );
+            return res.status(200).json(
+                { success: true, data: users, pagination: pagination, message: "All Users Retrieved" }
+            );
+        } catch (error: Error | any) {
+            return res.status(error.statusCode ?? 500).json(
+                { success: false, message: error.message || "Internal Server Error" }
+            );
+        }
+    }
+
 

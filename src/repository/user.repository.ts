@@ -36,4 +36,12 @@ export class UserRepository implements IUserRepository {
     // Finally delete the user itself
     return UserModel.findByIdAndDelete(id).exec();
   }
+
+    async updateUser(id: string, updateData: Partial<IUser>): Promise<IUser | null> {
+        // UserModel.updateOne({ _id: id }, { $set: updateData });
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            id, updateData, { new: true } // return the updated document
+        );
+        return updatedUser;
+    }
 }
