@@ -5,6 +5,7 @@ import consumerRoutes from "./routes/consumer.route";
 import retailerRoutes from "./routes/retailer.route";
 import adminRoutes from "./routes/admin.routes";
 import productRouter from './routes/product.routes';
+import reviewRoutes from "./routes/review.routes";
 import cors from 'cors';
 import path from "path";
 
@@ -27,6 +28,7 @@ app.use("/api/admin",adminRoutes)
 app.use("/api/consumers", consumerRoutes);
 app.use("/api/retailers", retailerRoutes);
 app.use('/api/products', productRouter);
+app.use('/api/reviews',reviewRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const status = err.statusCode ?? 500;
