@@ -1,116 +1,121 @@
 // src/controllers/review.controller.ts
 import { Request, Response, NextFunction } from "express";
+import path from "path";
+import fs from "fs";
 import { ReviewService } from "../services/review.service";
 import { HttpError } from "../errors/http.error";
-import path from "path";
 
 export const createReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const payload = req.body;
     const created = await ReviewService.create(payload);
-    return res.status(201).json({ success: true, data: created, message: "Review created" });
+    return res.json({ success: true, data: created });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
 export const getReviewById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.id;
-    const doc = await ReviewService.getById(id);
+    const doc = await ReviewService.getById(req.params.id);
     return res.json({ success: true, data: doc });
   } catch (err) {
-    next(err);
-  }
-};
-
-export const getReviewsByAuthor = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const authorId = req.params.authorId;
-    const docs = await ReviewService.getByAuthor(authorId);
-    return res.json({ success: true, data: docs });
-  } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
 export const listReviewsPaginated = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { page, size, search, sentiment, productName } = req.query;
-    const result = await ReviewService.listPaginated({
+    const data = await ReviewService.listPaginated({
       page: Number(page) || 1,
       size: Number(size) || 10,
       search: typeof search === "string" ? search : undefined,
       sentiment: typeof sentiment === "string" ? sentiment : undefined,
       productName: typeof productName === "string" ? productName : undefined,
     });
-    return res.json({ success: true, data: result.items, pagination: result.pagination });
+    return res.json({ success: true, data });
   } catch (err) {
-    next(err);
+    return next(err);
+  }
+};
+
+export const getReviewsByAuthor = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const docs = await ReviewService.getByAuthor(req.params.authorId);
+    return res.json({ success: true, data: docs });
+  } catch (err) {
+    return next(err);
   }
 };
 
 export const isLikedByUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.id;
-    const userId = req.params.userId;
-    const liked = await ReviewService.isLikedByUser(id, userId);
+    const liked = await ReviewService.isLikedByUser(req.params.id, req.params.userId);
     return res.json({ success: true, data: { liked } });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
 export const likeReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.id;
-    const { userId } = req.body;
-    const updated = await ReviewService.like(id, userId);
+    const updated = await ReviewService.like(req.params.id, req.body.userId);
     return res.json({ success: true, data: updated });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
 export const unlikeReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.id;
-    const { userId } = req.body;
-    const updated = await ReviewService.unlike(id, userId);
+    const updated = await ReviewService.unlike(req.params.id, req.body.userId);
     return res.json({ success: true, data: updated });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
 export const updateReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.id;
-    const payload = req.body;
-    const updated = await ReviewService.update(id, payload);
+    const updated = await ReviewService.update(req.params.id, req.body);
     return res.json({ success: true, data: updated });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
 export const deleteReview = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const id = req.params.id;
-    await ReviewService.delete(id);
-    return res.status(200).json({ success: true, message: "Deleted" });
+    const ok = await ReviewService.delete(req.params.id);
+    return res.json({ success: true, data: ok });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
+/**
+ * Upload image handler
+ * - Validates req.file
+ * - Passes disk path + metadata to service
+ * - Service stores web path in DB and returns updated review
+ */
 export const uploadReviewImage = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id;
+    if (!id) throw new HttpError(400, "Missing review id");
     if (!req.file) throw new HttpError(400, "No file uploaded");
-    const updated = await ReviewService.uploadImage(id, req.file.path, req.file.originalname);
+
+    // Multer provides req.file.path (absolute) and req.file.filename
+    const diskPath = (req.file as any).path;
+    const filename = (req.file as any).filename;
+    const originalName = (req.file as any).originalname;
+
+    // Call service with normalized object
+    const updated = await ReviewService.uploadImage(id, { diskPath, filename, originalName });
+
     return res.json({ success: true, data: updated });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
