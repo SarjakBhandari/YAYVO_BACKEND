@@ -9,6 +9,9 @@ import reviewRoutes from "./routes/review.routes";
 import cors from "cors";
 import path from "path";
 
+import collectionRoutes from "./routes/collection.routes";
+
+
 const app = express();
 app.use(express.json());
 // Serve static files from /uploads
@@ -39,6 +42,7 @@ app.use("/api/consumers", consumerRoutes);
 app.use("/api/retailers", retailerRoutes);
 app.use("/api/products", productRouter);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/collections", collectionRoutes);
 
 app.use(
   (
