@@ -2,6 +2,8 @@ import { ProductRepository } from '../repository/product.repository';
 import { CreateProductInput, UpdateProductInput } from '../dtos/product.dtos';
 import { HttpError } from '../errors/http.error';
 import fs from 'fs';
+import mongoose from "mongoose";
+
 import path from 'path';
 
 const repo = new ProductRepository();
@@ -125,9 +127,24 @@ export class ProductService {
     return { productId, userId, liked: false, noOfLikes: p.noOfLikes };
   }
 
-  async isLiked(productId: string, userId: string) {
-    const p = await repo.findById(productId);
-    if (!p) throw new HttpError(404, 'Product not found');
-    return { productId, userId, liked: p.likes.includes(userId) };
+
+async isLiked(productId: string, userId: string) {
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    throw new HttpError(400, "Invalid productId");
   }
+
+  if (!userId) {
+    throw new HttpError(400, "userId is required");
+  }
+
+  const p = await repo.findById(productId);
+  if (!p) throw new HttpError(404, "Product not found");
+
+  const liked = p.likes.some(
+    (id: any) => id.toString() === userId.toString()
+  );
+
+  return liked;
+}
+
 }

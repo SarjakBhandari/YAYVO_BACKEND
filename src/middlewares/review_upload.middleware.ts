@@ -1,4 +1,4 @@
-// src/middleware/product_upload.middleware.ts
+// src/middlewares/review_upload.middleware.ts
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -11,21 +11,16 @@ const storage = multer.diskStorage({
     cb(null, UPLOAD_DIR);
   },
   filename: (req, file, cb) => {
-    const id = req.params.id || "unknown";
+    const id = req.params.id || Date.now().toString();
     const ext = path.extname(file.originalname) || ".jpg";
     const filename = `${id}${ext}`;
     const fullPath = path.join(UPLOAD_DIR, filename);
 
-    // If a file with the same canonical name exists, remove it so the new upload overwrites cleanly.
     try {
       if (fs.existsSync(fullPath)) {
-        // attempt to remove existing file before multer writes the new one
         fs.unlinkSync(fullPath);
       }
     } catch (err) {
-      // If unlink fails, continue — multer will still attempt to write and may overwrite.
-      // Do not block the upload; controller/service should handle any remaining errors.
-      // eslint-disable-next-line no-console
       console.warn("Could not remove existing file before upload:", err);
     }
 

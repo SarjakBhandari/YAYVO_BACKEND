@@ -1,9 +1,9 @@
 // src/services/review.service.ts
+import path from "path";
+import fs from "fs-extra";
 import { HttpError } from "../errors/http.error";
 import { ReviewRepository } from "../repository/review.repository";
 import { CreateReviewDto, UpdateReviewDto } from "../dtos/review.dtos";
-import path from "path";
-import fs from "fs-extra";
 
 const UPLOAD_DIR = path.join(process.cwd(), "uploads", "reviews");
 
@@ -16,10 +16,15 @@ function normalizeSentiments(input?: string[] | string) {
     .filter(Boolean);
 }
 
+async function ensureUploadDir() {
+  await fs.ensureDir(UPLOAD_DIR);
+}
+
 export const ReviewService = {
   create: async (payload: CreateReviewDto) => {
     if (!payload.title) throw new HttpError(400, "title is required");
     if (!payload.authorId) throw new HttpError(400, "authorId is required");
+
     const doc = await ReviewRepository.create({
       title: payload.title,
       description: payload.description ?? "",
@@ -28,9 +33,10 @@ export const ReviewService = {
       productImage: payload.productImage ?? "",
       authorId: payload.authorId,
       authorLocation: payload.authorLocation ?? "",
-      likes: 0,
-      likedBy: [],
+      noOfLikes: 0,
+      likes: [],
     } as any);
+
     return doc;
   },
 
@@ -48,16 +54,14 @@ export const ReviewService = {
     const page = Math.max(1, Number(opts.page ?? 1));
     const size = Math.max(1, Number(opts.size ?? 10));
     const filter: any = {};
+
     if (opts.search) {
       const q = new RegExp(opts.search, "i");
       filter.$or = [{ title: q }, { description: q }, { productName: q }];
     }
-    if (opts.sentiment) {
-      filter.sentiments = opts.sentiment;
-    }
-    if (opts.productName) {
-      filter.productName = new RegExp(opts.productName, "i");
-    }
+    if (opts.sentiment) filter.sentiments = opts.sentiment;
+    if (opts.productName) filter.productName = new RegExp(opts.productName, "i");
+
     return ReviewRepository.paginatedList(filter, page, size);
   },
 
@@ -88,6 +92,7 @@ export const ReviewService = {
     if (payload.productName !== undefined) toUpdate.productName = payload.productName;
     if (payload.productImage !== undefined) toUpdate.productImage = payload.productImage;
     if (payload.authorLocation !== undefined) toUpdate.authorLocation = payload.authorLocation;
+
     const updated = await ReviewRepository.updateById(id, toUpdate);
     if (!updated) throw new HttpError(404, "Review not found");
     return updated;
@@ -96,40 +101,72 @@ export const ReviewService = {
   delete: async (id: string) => {
     const doc = await ReviewRepository.deleteById(id);
     if (!doc) throw new HttpError(404, "Review not found");
-    // remove productImage file if present
+
     if (doc.productImage) {
       const filename = path.basename(doc.productImage);
       const full = path.join(UPLOAD_DIR, filename);
       try {
         await fs.remove(full);
-      } catch {}
+      } catch {
+        // ignore cleanup errors
+      }
     }
     return true;
   },
 
-  uploadImage: async (id: string, filePath: string, originalName: string) => 
-    { if (!filePath) throw new HttpError(400, "No uploaded file path provided"); 
-        await fs.ensureDir(UPLOAD_DIR); const ext = path.extname(originalName) || ".jpg";
-         const filename = `${id}${ext}`; const dest = path.join(UPLOAD_DIR, filename); 
-         const srcResolved = path.resolve(filePath); const destResolved = path.resolve(dest); 
-         try { 
-            // If multer already wrote to the canonical destination, skip moving. 
-            if (srcResolved === destResolved) {
-                // ensure file exists 
-                if (!(await fs.pathExists(destResolved)))
-                    { throw new HttpError(500, "Uploaded file missing after upload"); } 
-            } 
-                else {
-                    // If destination exists, remove it first so move is a clean overwrite
-                    if (await fs.pathExists(destResolved))
-                        { try { await fs.remove(destResolved); } 
-                    catch (e) { 
-                        // best-effort removal; continue to move which will overwrite if possible } } // Move uploaded file (tmp or unique name) to canonical destination 
-                        await fs.move(srcResolved, destResolved, { overwrite: true }); }
-                    }}}
-                     catch (err: any) { throw new HttpError(500, `Failed to store uploaded file: ${err?.message || err}`);
-                    } 
-                    const imagePath = `/uploads/reviews/${filename}`; const updated = await ReviewRepository.updateById(id, { productImage: imagePath } as any);
-                    if (!updated) throw new HttpError(404, "Review not found"); 
-                    return updated; },
+  /**
+   * uploadImage accepts either:
+   *  - (id, { diskPath, filename, originalName })
+   *  - (id, diskPath, originalName)
+   */
+  uploadImage: async (id: string, fileOrPath: any, originalName?: string) => {
+    if (!id) throw new HttpError(400, "Missing review id");
+    if (!fileOrPath) throw new HttpError(400, "No uploaded file provided");
+
+    let diskPath: string | undefined;
+    let filename: string | undefined;
+    let origName: string | undefined;
+
+    if (typeof fileOrPath === "string") {
+      diskPath = fileOrPath;
+      origName = originalName;
+      filename = origName ? `${id}${path.extname(origName) || ".jpg"}` : undefined;
+    } else if (typeof fileOrPath === "object") {
+      diskPath = fileOrPath.diskPath ?? fileOrPath.path ?? fileOrPath.filePath;
+      filename = fileOrPath.filename ?? (fileOrPath.originalName ? `${id}${path.extname(fileOrPath.originalName)}` : undefined);
+      origName = fileOrPath.originalName ?? fileOrPath.originalname ?? originalName;
+    }
+
+    if (!diskPath) throw new HttpError(400, "No uploaded file path provided");
+
+    await ensureUploadDir();
+
+    const ext = path.extname(origName || filename || diskPath) || ".jpg";
+    const finalFilename = filename ?? `${id}${ext}`;
+    const dest = path.join(UPLOAD_DIR, finalFilename);
+
+    try {
+      const srcResolved = path.resolve(diskPath);
+      const destResolved = path.resolve(dest);
+
+      if (srcResolved !== destResolved) {
+        if (await fs.pathExists(destResolved)) {
+          await fs.remove(destResolved);
+        }
+        await fs.move(srcResolved, destResolved, { overwrite: true });
+      } else {
+        // already in place
+      }
+    } catch (err: any) {
+      throw new HttpError(500, `Failed to store uploaded file: ${err?.message ?? err}`);
+    }
+
+    // Use posix join to ensure forward slashes in URL
+    const imagePath = path.posix.join("/uploads", "reviews", finalFilename);
+
+    const updated = await ReviewRepository.updateById(id, { productImage: imagePath } as any);
+    if (!updated) throw new HttpError(404, "Review not found");
+
+    return updated;
+  },
 };

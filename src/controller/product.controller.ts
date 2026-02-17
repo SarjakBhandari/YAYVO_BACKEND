@@ -3,6 +3,7 @@ import { ProductService } from '../services/product.service';
 import { CreateProductDto, UpdateProductDto } from '../dtos/product.dtos';
 import { uploadProductPicture } from '../middlewares/product_upload.middleware'; // your file path
 import path from 'path';
+import mongoose from 'mongoose';
 
 const service = new ProductService();
 
@@ -94,7 +95,7 @@ export async function updateProduct(req: Request, res: Response, next: NextFunct
       retailerAuthId: body.retailerAuthId,
       retailerName: body.retailerName,
       retailerIcon: body.retailerIcon,
-      targetSentiment: body.targetSentiment ? JSON.parse(body.targetSentiment) : undefined
+      targetSentiment: body.targetSentiment 
     });
     const updated = await service.update(req.params.id, input);
     res.json(updated);
@@ -135,16 +136,34 @@ export async function unlikeProduct(req: Request, res: Response, next: NextFunct
   }
 }
 
-// Is liked
 export async function isLiked(req: Request, res: Response, next: NextFunction) {
   try {
-    const { productId, userId } = req.query as any;
-    const out = await service.isLiked(productId, userId);
-    res.json(out);
+    const productId = req.query.productId as string;
+    const userId = req.query.userId as string;
+
+    if (!productId || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: "productId and userId are required",
+      });
+    }
+
+    const liked = await service.isLiked(productId, userId);
+
+    return res.json({
+      success: true,
+      liked,
+    });
+
   } catch (err) {
     next(err);
   }
 }
+
+
+
+
+
 function parseTargetSentiment(value: any): string[] | undefined {
   if (!value) return undefined;
   if (Array.isArray(value)) return value;

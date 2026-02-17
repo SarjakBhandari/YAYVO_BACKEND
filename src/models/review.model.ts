@@ -1,4 +1,3 @@
-// src/models/review.model.ts
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IReview extends Document {
@@ -7,8 +6,8 @@ export interface IReview extends Document {
   sentiments: string[];
   productName?: string;
   productImage?: string;
-  likes: number;
-  likedBy: string[]; // user authIds
+  noOfLikes: number;       
+  likedBy: string[];       
   authorId: string;
   authorLocation?: string;
   createdAt: Date;
@@ -22,7 +21,7 @@ const ReviewSchema = new Schema<IReview>(
     sentiments: { type: [String], default: [] },
     productName: { type: String, default: "" },
     productImage: { type: String, default: "" },
-    likes: { type: Number, default: 0 },
+    noOfLikes: { type: Number, default: 0 },   
     likedBy: { type: [String], default: [] },
     authorId: { type: String, required: true, index: true },
     authorLocation: { type: String, default: "" },

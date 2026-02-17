@@ -1,4 +1,4 @@
-// src/routes/review.routes.ts
+// routes/review.routes.ts
 import express from "express";
 import {
   createReview,
@@ -17,14 +17,14 @@ import { uploadReviewPicture } from "../middlewares/review_upload.middleware";
 const router = express.Router();
 
 router.post("/", createReview);
+router.get("/paginated", listReviewsPaginated);
+router.get("/author/:authorId", getReviewsByAuthor);
+
 router.get("/:id", getReviewById);
 router.put("/:id", updateReview);
 router.delete("/:id", deleteReview);
 
 router.post("/:id/image", uploadReviewPicture.single("image"), uploadReviewImage);
-
-router.get("/paginated", listReviewsPaginated);
-router.get("/author/:authorId", getReviewsByAuthor);
 
 router.get("/:id/islikedby/:userId", isLikedByUser);
 router.post("/:id/like", likeReview);
