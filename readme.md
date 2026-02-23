@@ -6,8 +6,8 @@
 
 **Author:** Sarjak Bhandari  
 **CoventryId:** 14811977
-**Batch:**35 
-**Section**:B
+**Batch:** 35 
+**Section:** B
 
 ---
 
@@ -211,7 +211,7 @@ YAYVO_BACKEND/
 
 ---
 
-## 🔐 Security Features
+## Security Features
 
 ### Authentication
 - **JWT Token-based Authentication**
