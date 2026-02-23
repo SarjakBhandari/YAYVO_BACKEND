@@ -17,20 +17,20 @@ app.use(express.json());
 // Serve static files from /uploads
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
-// --- Rate Limiter Setup ---
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: {
-    success: false,
-    message: "Too many requests from this IP, please try again later.",
-  },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false,  // Disable the `X-RateLimit-*` headers
-});
+// // --- Rate Limiter Setup ---
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 5000, // limit each IP to 100 requests per windowMs
+//   message: {
+//     success: false,
+//     message: "Too many requests from this IP, please try again later.",
+//   },
+//   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+//   legacyHeaders: false,  // Disable the `X-RateLimit-*` headers
+// });
 
-// Apply rate limiter globally
-app.use(limiter);
+// // Apply rate limiter globally
+// app.use(limiter);
 
 // --- CORS Setup ---
 const allowedOrigins = [CORS_DOMAIN_FIRST, CORS_DOMAIN_SECOND];
