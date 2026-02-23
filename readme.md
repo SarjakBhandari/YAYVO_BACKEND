@@ -310,7 +310,7 @@ YAYVO_BACKEND/
 
 ---
 
-## 🔌 API Endpoints Overview
+## API Endpoints Overview
 
 ### Authentication (`/api/auth`)
 - `POST /register/consumer` - Register as consumer
