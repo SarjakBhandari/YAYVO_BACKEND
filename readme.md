@@ -359,7 +359,7 @@ YAYVO_BACKEND/
 
 ---
 
-## 🚀 Build & Run Scripts
+## Build & Run Scripts
 
 ```bash
 # Development - with auto-restart on file changes
@@ -456,7 +456,7 @@ Main entry point: `dist/index.js`
 
 ---
 
-## ata Flow Example: User Registration
+## Data Flow Example: User Registration
 
 ```
 1. POST /api/auth/register/consumer
@@ -507,5 +507,3 @@ Main entry point: `dist/index.js`
 - Static file caching via `/uploads` endpoint
 
 ---
-
-**Last Updated:** February 23, 2026
