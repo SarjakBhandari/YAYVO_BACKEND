@@ -2,7 +2,7 @@
 
 ## Project Summary
 
-**YAYVO Backend** is a Node.js/Express-based REST API backend for an e-commerce platform. It manages consumers, retailers, products, reviews, and collections with comprehensive authentication, authorization, and file upload capabilities.
+**YAYVO Backend** is a Node.js/Express-based REST API backend for an review based socio commerce platform which works on sentiments. It manages consumers, retailers, products, reviews, and collections with comprehensive authentication, authorization, and file upload capabilities.
 
 **Author:** Sarjak Bhandari  
 **CoventryId:** 14811977
