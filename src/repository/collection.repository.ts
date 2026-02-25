@@ -2,6 +2,7 @@ import CollectionModel, { ICollection } from "../models/collection.model";
 
 export const CollectionRepository = {
   findOrCreateByAuthId: async (authId: string) => {
+    if (!authId) throw new Error("consumerAuthId required");
     let doc = await CollectionModel.findOne({ consumerAuthId: authId });
     if (!doc) {
       doc = await CollectionModel.create({ consumerAuthId: authId, savedReviews: [], savedProducts: [] });
@@ -10,6 +11,8 @@ export const CollectionRepository = {
   },
 
   addReviewId: async (authId: string, reviewId: string) => {
+    if (!authId) throw new Error("consumerAuthId required");
+    if (!reviewId) throw new Error("reviewId required");
     return CollectionModel.findOneAndUpdate(
       { consumerAuthId: authId },
       { $addToSet: { savedReviews: reviewId } },
@@ -18,6 +21,8 @@ export const CollectionRepository = {
   },
 
   removeReviewId: async (authId: string, reviewId: string) => {
+    if (!authId) throw new Error("consumerAuthId required");
+    if (!reviewId) throw new Error("reviewId required");
     return CollectionModel.findOneAndUpdate(
       { consumerAuthId: authId },
       { $pull: { savedReviews: reviewId } },
@@ -26,6 +31,8 @@ export const CollectionRepository = {
   },
 
   addProductId: async (authId: string, productId: string) => {
+    if (!authId) throw new Error("consumerAuthId required");
+    if (!productId) throw new Error("productId required");
     return CollectionModel.findOneAndUpdate(
       { consumerAuthId: authId },
       { $addToSet: { savedProducts: productId } },
@@ -34,6 +41,8 @@ export const CollectionRepository = {
   },
 
   removeProductId: async (authId: string, productId: string) => {
+    if (!authId) throw new Error("consumerAuthId required");
+    if (!productId) throw new Error("productId required");
     return CollectionModel.findOneAndUpdate(
       { consumerAuthId: authId },
       { $pull: { savedProducts: productId } },

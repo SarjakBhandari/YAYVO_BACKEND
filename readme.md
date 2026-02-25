@@ -287,12 +287,31 @@ YAYVO_BACKEND/
 - `DELETE /:id` - Delete review
 
 ### Collections (`/api/collections`)
-- `GET /` - List collections
-- `GET /:id` - Get collection details
-- `POST /` - Create collection (retailer only)
-- `PUT /:id` - Update collection
-- `DELETE /:id` - Delete collection
+The collections resource now behaves as a per‑consumer aggregated store of saved
+products and reviews rather than a generic CRUD collection.  the available
+endpoints are:
 
+- `POST /review/save` – save a review for the consumer specified in the body
+  (`{ consumerAuthId, reviewId }`). idempotent; duplicates are ignored.
+- `POST /review/unsave` – remove a saved review (`{ consumerAuthId, reviewId }`).
+- `POST /product/save` – save a product (`{ consumerAuthId, productId }`).
+- `POST /product/unsave` – remove a saved product (`{ consumerAuthId, productId }`).
+- `GET /:consumerAuthId/reviews` – fetch paginated list of saved reviews.
+- `GET /:consumerAuthId/products` – fetch paginated list of saved products.
+
+The router performs request validation using Zod; all body fields are required.
+
+> **Database compatibility:**
+> Older versions stored one document per saved item and enforced a unique
+> index on `{consumerId,type,itemId}`.  that index is no longer necessary and
+> will cause `E11000 duplicate key error` if any of the fields are `null`.
+> The `connectDatabase()` helper automatically drops the legacy index on
+> startup, but you can also remove it manually:
+>
+> ```js
+> db.collections.dropIndex("consumerId_1_type_1_itemId_1");
+> ```
+> 
 ### Admin (`/api/admin`)
 - Administrative operations
 - User management
