@@ -1,8 +1,10 @@
 import { z } from "zod";
 
 /**
- * SaveItem schema: consumerId, type, itemId, optional payload
- * Use z.record(keySchema, valueSchema) to avoid TS signature errors.
+ * Generic schema kept for backwards compatibility; most endpoints now
+ * validate more specific bodies below.  it is exported in case any
+ * one-off callers still rely on it (the index cleanup above corresponds to
+ * an earlier design that used this structure).
  */
 export const SaveItemSchema = z.object({
   consumerId: z.string().min(1),
@@ -12,6 +14,32 @@ export const SaveItemSchema = z.object({
 });
 
 export type SaveItemDto = z.infer<typeof SaveItemSchema>;
+
+// --- new explicit request schemas ------------------------------------------------
+
+export const SaveReviewSchema = z.object({
+  consumerAuthId: z.string().min(1),
+  reviewId: z.string().min(1),
+});
+export type SaveReviewDto = z.infer<typeof SaveReviewSchema>;
+
+export const UnsaveReviewSchema = z.object({
+  consumerAuthId: z.string().min(1),
+  reviewId: z.string().min(1),
+});
+export type UnsaveReviewDto = z.infer<typeof UnsaveReviewSchema>;
+
+export const SaveProductSchema = z.object({
+  consumerAuthId: z.string().min(1),
+  productId: z.string().min(1),
+});
+export type SaveProductDto = z.infer<typeof SaveProductSchema>;
+
+export const UnsaveProductSchema = z.object({
+  consumerAuthId: z.string().min(1),
+  productId: z.string().min(1),
+});
+export type UnsaveProductDto = z.infer<typeof UnsaveProductSchema>;
 
 /**
  * Unsave by consumer schema

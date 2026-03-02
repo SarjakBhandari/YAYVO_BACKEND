@@ -141,8 +141,9 @@ describe("Collection Integration Tests (mocked CollectionService)", () => {
 
     test("should fail with missing consumerAuthId", async () => {
       const response = await request(app).post("/api/collections/review/save").send({ reviewId: reviewId1 });
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("success", false);
+      expect(response.body.message).toMatch(/consumerAuthId/);
     });
   });
 
@@ -184,8 +185,9 @@ describe("Collection Integration Tests (mocked CollectionService)", () => {
 
     test("should fail with missing productId", async () => {
       const response = await request(app).post("/api/collections/product/save").send({ consumerAuthId });
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(400);
       expect(response.body).toHaveProperty("success", false);
+      expect(response.body.message).toMatch(/productId/);
     });
   });
 
