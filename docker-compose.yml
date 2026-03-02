@@ -1,0 +1,39 @@
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: yayvo_mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - yayvo-net
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yayvo_backend
+    ports:
+      - "5050:5050"
+    environment:
+      - PORT=5050
+      - MONGODB_URI=mongodb://mongo:27017/yayvo
+    depends_on:
+      - mongo
+    command: sh -c "apk add --no-cache netcat-openbsd && \
+      until nc -z mongo 27017; do echo waiting for mongo; sleep 1; done; \
+      npm install && npm run build && npm run start"
+    networks:
+      - yayvo-net
+volumes:
+  mongo_data:
+networks:
+  yayvo-net:
+    driver: bridge
+
